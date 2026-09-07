@@ -1,10 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta name="naver-site-verification" content="8a7fd6d419555a8ce7916a3abb3026fcbf307cff" />
-<title>fvg - FVG 파트너스 공식 홈페이지</title>
-<meta name="description" content="fvg 공식 웹사이트입니다. FVG 파트너스 주요 정보를 확인하세요.">
-<meta name="keywords" content="fvg, fvgpartners, FVG파트너스">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FVG | Finance Value Growth — Corporate Finance &amp; Growth Advisory</title>
@@ -104,11 +100,39 @@ ul{list-style:none}
 .nav-item:hover .nl-en{transform:translateY(-100%);opacity:0}
 .nav-item:hover .nl-kr{transform:translateY(0);opacity:1}
 .nav-burger{display:none}
+.nav-burger-wrap{position:relative;display:none}
 @media (max-width:860px){
   .nav-links{display:none}
-  .nav-burger{display:block;color:#fff;font-family:var(--font-m);font-size:12px;border:1px solid rgba(255,255,255,.4);padding:8px 14px;border-radius:999px}
+  .nav-burger-wrap{display:block}
+  .nav-burger{
+    display:block;color:#fff;font-family:var(--font-m);font-size:12px;
+    border:1px solid rgba(255,255,255,.4);padding:8px 14px;border-radius:999px;
+    background:none;cursor:pointer;-webkit-appearance:none;appearance:none;
+  }
   .nav.solid .nav-burger{color:var(--ink);border-color:var(--ink)}
 }
+.mobile-menu{
+  position:absolute;top:calc(100% + 10px);right:0;
+  background:rgba(10,14,22,.97);backdrop-filter:blur(14px);
+  border:1px solid var(--line-dark);border-radius:6px;
+  min-width:180px;padding:6px;display:flex;flex-direction:column;
+  opacity:0;transform:translateY(-8px);visibility:hidden;pointer-events:none;
+  transition:opacity .25s ease, transform .25s ease, visibility 0s linear .25s;
+  box-shadow:0 20px 40px -14px rgba(0,0,0,.55);
+  z-index:200;
+}
+.mobile-menu.open{
+  opacity:1;transform:translateY(0);visibility:visible;pointer-events:auto;
+  transition:opacity .25s ease, transform .25s ease;
+}
+.mobile-menu a{
+  font-family:var(--font-m);font-size:12.5px;letter-spacing:.09em;color:#EDEDE7;
+  padding:12px 14px;border-radius:4px;white-space:nowrap;
+  transition:background .2s ease, color .2s ease;
+}
+.mobile-menu a:not(:last-child){border-bottom:1px solid var(--line-dark)}
+.mobile-menu a:hover{background:rgba(169,130,60,.14);color:var(--accent)}
+@media (min-width:861px){.mobile-menu{display:none}}
 
 /* ---------- HERO ---------- */
 .hero{
@@ -413,7 +437,17 @@ footer{background:var(--navy);color:var(--muted-inv);padding:56px 0 40px;border-
       <a href="#process" class="nav-item"><span class="nl nl-en">PROCESS</span><span class="nl nl-kr">진행 절차</span></a>
       <a href="#contact" class="nav-item"><span class="nl nl-en">CONTACT</span><span class="nl nl-kr">문의하기</span></a>
     </div>
-    <div class="nav-burger">MENU</div>
+    <div class="nav-burger-wrap">
+      <button class="nav-burger" id="navBurger" type="button" aria-expanded="false" aria-controls="mobileMenu" aria-label="메뉴 열기">MENU</button>
+      <div class="mobile-menu" id="mobileMenu">
+        <a href="#insight">INSIGHT</a>
+        <a href="#company">WHY FVG</a>
+        <a href="#solutions">SOLUTIONS</a>
+        <a href="#case">CASE</a>
+        <a href="#process">PROCESS</a>
+        <a href="#contact">CONTACT</a>
+      </div>
+    </div>
   </div>
 </nav>
 
@@ -737,6 +771,38 @@ const nav = document.getElementById('nav');
 window.addEventListener('scroll', () => {
   nav.classList.toggle('solid', window.scrollY > 60);
 }, {passive:true});
+
+// mobile menu — tap to toggle, hover to open (for narrow desktop windows), outside-click / Escape to close
+const navBurger = document.getElementById('navBurger');
+const mobileMenu = document.getElementById('mobileMenu');
+if (navBurger && mobileMenu){
+  let closeTimer = null;
+  const openMenu = () => {
+    clearTimeout(closeTimer);
+    mobileMenu.classList.add('open');
+    navBurger.setAttribute('aria-expanded', 'true');
+  };
+  const closeMenu = () => {
+    mobileMenu.classList.remove('open');
+    navBurger.setAttribute('aria-expanded', 'false');
+  };
+  const scheduleClose = () => { closeTimer = setTimeout(closeMenu, 250); };
+
+  navBurger.addEventListener('click', (e) => {
+    e.stopPropagation();
+    mobileMenu.classList.contains('open') ? closeMenu() : openMenu();
+  });
+  navBurger.addEventListener('mouseenter', openMenu);
+  navBurger.addEventListener('mouseleave', scheduleClose);
+  mobileMenu.addEventListener('mouseenter', () => clearTimeout(closeTimer));
+  mobileMenu.addEventListener('mouseleave', scheduleClose);
+  mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', closeMenu));
+  document.addEventListener('click', (e) => {
+    if (!mobileMenu.contains(e.target) && e.target !== navBurger) closeMenu();
+  });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenu(); });
+  window.addEventListener('resize', () => { if (window.innerWidth > 860) closeMenu(); });
+}
 
 // hero scan bars
 const scanBars = document.getElementById('scanBars');
